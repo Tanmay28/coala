@@ -115,12 +115,6 @@ def print_result(console_printer,
     :param file_dict:       A dictionary containing all files with filename as
                             key.
     """
-    if not isinstance(result, Result):
-        log_printer.warn(_("One of the results can not be printed since it is "
-                           "not a valid derivative of the coala result "
-                           "class."))
-        return
-
     console_printer.print(format_lines("[{sev}] {bear}:".format(
         sev=RESULT_SEVERITY.__str__(result.severity), bear=result.origin)),
         color=RESULT_SEVERITY_COLORS[result.severity])
@@ -192,46 +186,22 @@ def print_results(log_printer,
     :param pre_padding:    No of lines of file to print before the result line.
                            Default value is 3.
     """
-    # We can't use None since we need line 109 be executed if file of first
-    # result is None
     console_printer = ConsolePrinter(print_colored=color)
-    current_file = False
-    current_line = 0
 
-    for result in sorted(result_list):
-        if result.file != current_file:
-            if result.file in file_dict or result.file is None:
-                current_file = result.file
-                current_line = 0
-                console_printer.print("\n\n{}".format(current_file
-                                                      if current_file is not
-                                                      None
-                                                      else STR_PROJECT_WIDE),
-                                      color=FILE_NAME_COLOR)
-            else:
-                log_printer.warn(_("A result ({}) cannot be printed "
-                                   "because it refers to a file that "
-                                   "doesn't seem to "
-                                   "exist.").format(str(result)))
-                continue
-
-        if result.line_nr is not None:
-            if current_file is None:
-                raise AssertionError("A result with a line_nr should also "
-                                     "have a file.")
-            if result.line_nr < current_line:  # pragma: no cover
-                raise AssertionError("The sorting of the results doesn't "
-                                     "work correctly.")
-            if len(file_dict[result.file]) < result.line_nr - 1:
-                console_printer.print(format_lines(lines=STR_LINE_DOESNT_EXIST))
-            else:
-                print_lines(console_printer,
-                            pre_padding,
-                            file_dict,
-                            current_line,
-                            result.line_nr,
-                            result.file)
-                current_line = result.line_nr
+    for result in result_list:
+        if not isinstance(result, Result):
+            log_printer.warn(_("One of the results can not be printed since it "
+                               "is not a valid derivative of the coala result "
+                               "class."))
+            continue
+        if len(result.affected_code) == 0:
+            console_printer.print(STR_PROJECT_WIDE)
+        else:
+            print_affected_lines(console_printer,
+                                 log_printer,
+                                 result,
+                                 file_dict,
+                                 pre_padding)
 
         print_result(console_printer,
                      log_printer,
@@ -239,6 +209,32 @@ def print_results(log_printer,
                      file_diff_dict,
                      result,
                      file_dict)
+
+
+def print_affected_lines(console_printer,
+                         log_printer,
+                         result,
+                         file_dict,
+                         pre_padding):
+    for sourcerange in result.affected_code:
+        if sourcerange.file not in file_dict:
+            log_printer.warn(_("The result points to a nonexistent file and "
+                               "thus the context cannot be shown."))
+            continue
+
+        console_printer.print("\n\n{}".format(sourcerange.file),
+                              color=FILE_NAME_COLOR)
+
+        if sourcerange.start.line is not None:
+            if len(file_dict[sourcerange.file]) < sourcerange.start.line - 1:
+                console_printer.print(format_lines(lines=STR_LINE_DOESNT_EXIST))
+            else:
+                print_lines(console_printer,
+                            pre_padding,
+                            file_dict,
+                            0,
+                            sourcerange.start.line,
+                            sourcerange.file)
 
 
 def require_setting(log_printer, setting_name, arr):
