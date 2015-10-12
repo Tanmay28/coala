@@ -18,7 +18,7 @@ class OpenEditorAction(ApplyPatchAction):
     @staticmethod
     def is_applicable(result):
         if isinstance(result, Result):
-            if result.file is not None:
+            if len(result.affected_code) > 0:
                 return True
         return False
 

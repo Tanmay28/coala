@@ -251,7 +251,7 @@ class ConsoleInteractionTest(unittest.TestCase):
                           {},
                           color=False)
             self.assertEqual(
-                "\n\n{}\n|    | [{}] origin:\n|    | message"
+                "{}\n|    | [{}] origin:\n|    | message"
                 "\n".format(STR_PROJECT_WIDE,
                             RESULT_SEVERITY.__str__(RESULT_SEVERITY.NORMAL)),
                 stdout.getvalue())
@@ -261,10 +261,10 @@ class ConsoleInteractionTest(unittest.TestCase):
             print_results(
                 self.log_printer,
                 Section(""),
-                [Result("SpaceConsistencyBear",
-                        "Trailing whitespace found",
-                        "proj/white",
-                        line_nr=2)],
+                [Result.for_simple_location("SpaceConsistencyBear",
+                                            "Trailing whitespace found",
+                                            "proj/white",
+                                            line=2)],
                 {"proj/white": ["test line\n", "line 2\n", "line 3\n"]},
                 {},
                 color=False)
@@ -279,10 +279,10 @@ class ConsoleInteractionTest(unittest.TestCase):
             print_results(
                 self.log_printer,
                 Section(""),
-                [Result("SpaceConsistencyBear",
-                        "Trailing whitespace found",
-                        "proj/white",
-                        line_nr=5)],
+                [Result.for_simple_location("SpaceConsistencyBear",
+                                            "Trailing whitespace found",
+                                            "proj/white",
+                                            line=5)],
                 {"proj/white": ["test line\n",
                                 "line 2\n",
                                 "line 3\n",
@@ -304,14 +304,14 @@ class ConsoleInteractionTest(unittest.TestCase):
         with retrieve_stdout() as stdout:
             print_results(self.log_printer,
                           Section(""),
-                          [Result("SpaceConsistencyBear",
-                                  "Trailing whitespace found",
-                                  "proj/white",
-                                  line_nr=5),
-                           Result("SpaceConsistencyBear",
-                                  "Trailing whitespace found",
-                                  "proj/white",
-                                  line_nr=2)],
+                          [Result.for_simple_location("SpaceConsistencyBear",
+                                                      "Trailing whitespace found",
+                                                      "proj/white",
+                                                      line=5),
+                           Result.for_simple_location("SpaceConsistencyBear",
+                                                      "Trailing whitespace found",
+                                                      "proj/white",
+                                                      line=2)],
                           {"proj/white": ["test line\n",
                                           "line 2\n",
                                           "line 3\n",
@@ -335,20 +335,23 @@ class ConsoleInteractionTest(unittest.TestCase):
                              stdout.getvalue())
 
     def test_print_results_missing_file(self):
-        # File isn't in dict, shouldn't print but also shouldn't throw. This
-        # can occur if filter writers are doing nonsense. If this happens twice
-        # the same should happen (whitebox testing: this is a potential bug.)
+        # File isn't in dict, shouldn't throw. This can occur if bear writers
+        # are doing nonsense. In this case the result gets printed without file
+        # or line information.
         self.log_printer = LogPrinter(NullPrinter())
         with retrieve_stdout() as stdout:
             print_results(
                 self.log_printer,
                 Section(""),
-                [Result("t", "msg", "file", line_nr=5),
-                 Result("t", "msg", "file", line_nr=5)],
+                [Result.for_simple_location("t", "msg", "file", line=5),
+                 Result.for_simple_location("t", "msg", "file", line=5)],
                 {},
                 {},
                 color=False)
-            self.assertEqual("", stdout.getvalue())
+            self.assertEqual("|    | [NORMAL] t:\n"
+                             "|    | msg\n"
+                             "|    | [NORMAL] t:\n"
+                             "|    | msg\n", stdout.getvalue())
 
     def test_print_results_missing_line(self):
         # Line isn't in dict[file], shouldn't print but also shouldn't throw.
@@ -357,7 +360,7 @@ class ConsoleInteractionTest(unittest.TestCase):
             print_results(
                 self.log_printer,
                 Section(""),
-                [Result("t", "msg", "file", line_nr=5)],
+                [Result.for_simple_location("t", "msg", "file", line=5)],
                 {"file": []},
                 {},
                 color=False)
@@ -370,7 +373,7 @@ class ConsoleInteractionTest(unittest.TestCase):
                           print_results,
                           self.log_printer,
                           Section(""),
-                          [Result("t", "msg", None, line_nr=5)],
+                          [Result.for_simple_location("t", "msg", None, line=5)],
                           {},
                           {})
 
