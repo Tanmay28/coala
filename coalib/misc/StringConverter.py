@@ -95,12 +95,6 @@ class StringConverter:
             self.__escaped_list = [elem.strip()
                                    for elem in self.__escaped_list]
 
-        # Need to do after stripping, cant use builtin functionality of split
-        while "" in self.__unescaped_list:
-            self.__unescaped_list.remove("")
-        while "" in self.__escaped_list:
-            self.__escaped_list.remove("")
-
     def __prepare_dict(self):
         # We must keep order here, user can drop it later.
         self.__dict = OrderedDict()

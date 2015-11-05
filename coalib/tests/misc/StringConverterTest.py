@@ -44,7 +44,7 @@ class ProcessTest(unittest.TestCase):
         self.uut = StringConverter("a, test with!!some challenge",
                                    list_delimiters=[",", " ", "!!"])
         self.assertEqual(list(self.uut),
-                         ["a", "test", "with", "some", "challenge"])
+                         ["a", "", "test", "with", "some", "challenge"])
         self.uut = StringConverter("a\\ \\,\\\\ test with!!some challenge",
                                    list_delimiters=[",", " ", "!!"])
         self.assertEqual(list(self.uut),
@@ -53,8 +53,8 @@ class ProcessTest(unittest.TestCase):
                                    list_delimiters=", !",
                                    strip_whitespaces=False)
         self.assertEqual(list(self.uut),
-                         ["a", "test", "with", "some", "\\ challenge "])
-        self.uut = StringConverter("a, test with!some \\\\\\ challenge\\ ",
+                         ["a", "", "test", "with", "some", "\\ challenge "])
+        self.uut = StringConverter("a,test with!some \\\\\\ challenge\\ ",
                                    list_delimiters=", !",
                                    strip_whitespaces=True)
         self.assertEqual(list(self.uut),
@@ -67,7 +67,7 @@ class ProcessTest(unittest.TestCase):
         self.assertTrue("bug" in self.uut)
         self.assertFalse("but" in self.uut)
 
-        self.uut = StringConverter("a, test, \n",
+        self.uut = StringConverter("a, test \n",
                                    list_delimiters=[","],
                                    strip_whitespaces=True)
         self.assertEqual(list(self.uut), ["a", "test"])
