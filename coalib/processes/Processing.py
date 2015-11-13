@@ -59,8 +59,8 @@ def print_result(results,
                  log_printer,
                  file_diff_dict):
     """
-    Takes the results produced by each bear and gives them to the print_results
-    method to present to the user.
+    Takes the relevant results produced by each bear and gives them to the
+    print_results method to present to the user.
 
     :param results:        A list of results.
     :param file_dict:      A dictionary containing the name of files and its
