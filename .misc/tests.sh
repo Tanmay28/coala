@@ -1,5 +1,11 @@
-set -x
 set -e
+
+# For some reason `nvm` has not been loaded. This generates a lot of output
+# in CI, so it's done before `set -x`
+source ~/nvm/nvm.sh
+nvm use stable
+
+set -x
 
 source .misc/env_variables.sh
 
